@@ -1,11 +1,11 @@
-
+from ai.agents.security_agent import analyze_finding as ai_analyze_finding
 def analyze_finding(finding):
     """
     Analyze a normalized security finding and add
     severity, explanation, impact, and remediation.
     """
 
-    check_id = finding.get("check_id", "UNKNOWN")
+    check_id = finding.get("rule_id", "UNKNOWN")
     title = finding.get("title", "Security issue detected")
 
     # Initial severity mapping
@@ -95,3 +95,17 @@ def analyze_findings(findings):
         analyze_finding(finding)
         for finding in findings
     ]
+
+def analyze_with_ai(finding):
+    """
+    Perform both rule-based and AI-powered analysis.
+    """
+
+    rule_analysis = analyze_finding(finding)
+
+    ai_analysis = ai_analyze_finding(finding)
+
+    return {
+        **rule_analysis,
+        "ai_analysis": ai_analysis.model_dump()
+    }

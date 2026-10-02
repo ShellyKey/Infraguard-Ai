@@ -1,14 +1,27 @@
+import os
 import subprocess
-
-CHECKOV_PATH = r"D:\Infraguard\backend\venv\Scripts\checkov.cmd"
+import sys
 
 
 def run_checkov(iac_path):
+    """
+    Run Checkov against the supplied IaC directory
+    using the current Python virtual environment.
+    """
+
+    checkov_path = os.path.join(
+        os.path.dirname(sys.executable),
+        "checkov.cmd"
+    )
+
+    if not os.path.exists(checkov_path):
+        raise RuntimeError(
+            f"Checkov executable not found at:\n{checkov_path}"
+        )
+
     result = subprocess.run(
         [
-            "cmd.exe",
-            "/c",
-            CHECKOV_PATH,
+            checkov_path,
             "-d",
             iac_path,
             "--output",
