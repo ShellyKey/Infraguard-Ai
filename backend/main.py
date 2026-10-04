@@ -1,13 +1,15 @@
+import sys
 import json
 from pathlib import Path
 
+# Allow Python to locate the root-level ai folder
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
 from fastapi import FastAPI, HTTPException
 
-from backend.scanners.checkov_scanner import run_checkov
-from backend.scanners.normalizer import normalize_checkov_results
-
-from ai.ai_adapter import analyze_normalized_finding
-
+from scanners.checkov_scanner import run_checkov
+from scanners.normalizer import normalize_checkov_results
+from ai.analyzer import analyze_findings
 
 app = FastAPI()
 
@@ -26,42 +28,17 @@ def scan():
     ).resolve()
 
     try:
-        # --------------------------------------------------
         # 1. Run Checkov
-        # --------------------------------------------------
-
         result = run_checkov(str(iac_path))
 
-        # --------------------------------------------------
         # 2. Parse Checkov JSON
-        # --------------------------------------------------
-
         raw_findings = json.loads(result)
 
-        # --------------------------------------------------
         # 3. Normalize Checkov findings
-        # --------------------------------------------------
-
         findings = normalize_checkov_results(raw_findings)
 
-        # --------------------------------------------------
-        # 4. Run AI analysis for every finding
-        # --------------------------------------------------
-
-        analyzed_findings = []
-
-        for finding in findings:
-
-            analysis = analyze_normalized_finding(finding)
-
-            analyzed_findings.append({
-                **finding,
-                "ai_analysis": analysis["ai_analysis"]
-            })
-
-        # --------------------------------------------------
-        # 5. Return final response
-        # --------------------------------------------------
+        # 4. Analyze findings using the AI module
+        analyzed_findings = analyze_findings(findings)
 
         return {
             "status": "success",

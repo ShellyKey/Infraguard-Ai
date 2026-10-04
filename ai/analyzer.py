@@ -5,7 +5,7 @@ def analyze_finding(finding):
     severity, explanation, impact, and remediation.
     """
 
-    check_id = finding.get("rule_id", "UNKNOWN")
+    check_id = finding.get("check_id", finding.get("rule_id", "UNKNOWN"))
     title = finding.get("title", "Security issue detected")
 
     # Initial severity mapping
