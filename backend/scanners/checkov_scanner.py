@@ -1,22 +1,22 @@
-import os
+import shutil
 import subprocess
-import sys
 
 
 def run_checkov(iac_path):
     """
-    Run Checkov against the supplied IaC directory
-    using the current Python virtual environment.
+    Run Checkov against the supplied IaC directory.
+    Works on both Windows and Linux/Docker environments.
     """
 
-    checkov_path = os.path.join(
-        os.path.dirname(sys.executable),
-        "checkov.cmd"
-    )
+    checkov_path = shutil.which("checkov")
 
-    if not os.path.exists(checkov_path):
+    if not checkov_path:
+        checkov_path = shutil.which("checkov.cmd")
+
+    if not checkov_path:
         raise RuntimeError(
-            f"Checkov executable not found at:\n{checkov_path}"
+            "Checkov executable not found. "
+            "Make sure Checkov is installed and available in PATH."
         )
 
     result = subprocess.run(
