@@ -1,6 +1,4 @@
 // ─── UI Model Types ────────────────────────────────────────────
-// These types define the frontend's data model.
-// The adapter (src/api/adapter.ts) maps the real backend JSON into these.
 
 export type Severity = 'critical' | 'high' | 'medium' | 'low';
 
@@ -19,7 +17,6 @@ export interface Scores {
   maintainability: number;
   performance: number;
   deployment_readiness: number;
-  /** True when scores are computed client-side (not from backend) */
   estimated: boolean;
 }
 
@@ -53,7 +50,23 @@ export interface ScanResult {
   findings: Finding[];
 }
 
-// ─── Backend response shape (raw) ──────────────────────────────
+// ─── Scan Progress ────────────────────────────────────────────
+
+export type ScanPhase =
+  | 'idle'
+  | 'scanning'
+  | 'normalizing'
+  | 'analyzing'
+  | 'complete'
+  | 'error';
+
+export interface ScanProgress {
+  phase: ScanPhase;
+  message: string;
+  percent: number;
+}
+
+// ─── Backend Finding ──────────────────────────────────────────
 
 export interface BackendFinding {
   check_id: string;
@@ -63,27 +76,43 @@ export interface BackendFinding {
   status: string;
   file: string;
   guideline: string;
-  ai_analysis: {
+
+  // Current backend AI response
+  ai?: {
     explanation: string;
     risk: string;
     impact: string;
     recommendation: string;
+    insecure_code?: string;
+    fixed_code?: string;
   };
+
+  // Older backend AI response
+  ai_analysis?: {
+    explanation: string;
+    risk: string;
+    impact: string;
+    recommendation: string;
+    insecure_code?: string;
+    fixed_code?: string;
+  };
+
+  // Current backend top-level fields
+  explanation?: string;
+  impact?: string;
+  remediation?: string;
 }
+
+// ─── Backend Scan Response ───────────────────────────────────
 
 export interface BackendScanResponse {
   status: string;
   message: string;
   total_findings: number;
   findings: BackendFinding[];
-}
 
-// ─── Scan Progress ─────────────────────────────────────────────
-
-export type ScanPhase = 'idle' | 'uploading' | 'scanning' | 'normalizing' | 'analyzing' | 'complete' | 'error';
-
-export interface ScanProgress {
-  phase: ScanPhase;
-  message: string;
-  percent: number;
+  summary?: SeveritySummary;
+  scores?: Scores;
+  scan_id?: string;
+  created_at?: string;
 }

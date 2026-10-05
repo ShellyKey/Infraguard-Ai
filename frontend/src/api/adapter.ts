@@ -167,16 +167,39 @@ function inferScanner(checkId: string): string {
   if (checkId.startsWith('CKV2_AWS') || checkId.startsWith('CKV_AWS')) return 'Checkov';
   return 'Checkov';
 }
-
 function buildAI(bf: BackendFinding): AIAnalysis {
   const snippet = CODE_SNIPPETS[bf.check_id];
+
+  const ai = bf.ai ?? bf.ai_analysis;
+
   return {
-    explanation: bf.ai_analysis.explanation,
-    risk: bf.ai_analysis.risk,
-    impact: bf.ai_analysis.impact,
-    recommendation: bf.ai_analysis.recommendation,
-    insecure_code: snippet?.insecure,
-    fixed_code: snippet?.fixed,
+    explanation:
+      ai?.explanation ??
+      bf.explanation ??
+      'No explanation available.',
+
+    risk:
+      ai?.risk ??
+      bf.severity ??
+      'UNKNOWN',
+
+    impact:
+      ai?.impact ??
+      bf.impact ??
+      'No impact information available.',
+
+    recommendation:
+      ai?.recommendation ??
+      bf.remediation ??
+      'No remediation recommendation available.',
+
+    insecure_code:
+      ai?.insecure_code ??
+      snippet?.insecure,
+
+    fixed_code:
+      ai?.fixed_code ??
+      snippet?.fixed,
   };
 }
 
